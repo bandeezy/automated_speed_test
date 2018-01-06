@@ -78,7 +78,7 @@ def get_speedtest_data():
 def write_results_to_csv(date_and_time, ping, download, upload):
     print("Writing results to CSV")
 
-    out_file = open('~/stored_data/internet_speed_test/data.csv', 'a')
+    out_file = open('/home/nick/stored_data/internet_speed_test/data.csv', 'a')
     writer = csv.writer(out_file)
     # TODO: properly separate date and time
     writer.writerow((date_and_time, ping, download, upload))
@@ -88,7 +88,7 @@ def write_results_to_csv(date_and_time, ping, download, upload):
 def get_twitter_account_info():
     print("Retrieving twitter account info")
     
-    auth_file = open('~/stored_data/internet_speed_test/twitter.txt', 'r')
+    auth_file = open('/home/nick/stored_data/internet_speed_test/twitter.txt', 'r')
     alist = []
     for line in auth_file:
         alist.append(line.strip())
