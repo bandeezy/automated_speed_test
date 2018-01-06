@@ -41,6 +41,7 @@ try:
 except ImportError:
     print("Could not import module 'tweepy'. Has it been installed?")
     sys.exit(1)
+# TODO: remove this or add this in to convert bytes to MB
 #try:
 #    from hurry.filesize import size
 #except ImportError:
