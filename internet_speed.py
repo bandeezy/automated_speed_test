@@ -24,9 +24,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+# Author: Nick S.
+# Username: bandeezy
+
 import os
 import sys
-import csv
 import datetime
 
 from argparse import ArgumentParser
@@ -41,24 +43,20 @@ try:
 except ImportError:
     print("Could not import module 'tweepy'. Has it been installed?")
     sys.exit(1)
-# TODO: remove this or add this in to convert bytes to MB
-#try:
-#    from hurry.filesize import size
-#except ImportError:
-#    print("Could not import module 'hurry.filesize'. Has it been installed?")
-#    sys.exit(1)
 
 
-def parse_arguments():
-    desc = 'Checks internet speed and informs Comcast via Twitter that internet is slow or down.\n'\
-           'Additionally, this records internet speed data for future plotting.\n'
+def parse_args():
+    desc = 'Checks internet speed and informs Comcast via Twitter that'\
+            'internet is slow or down.\nAdditionally, this records internet'\
+            'speed data for future plotting.\n'
 
     parser = ArgumentParser(description=desc)
     parser.add_argument('--enable_tweet', action='store_true', default=False)
-    
+
     args = parser.parse_args()
 
     return args
+
 
 def get_speedtest_data():
     print("Testing internet speed")
@@ -66,41 +64,46 @@ def get_speedtest_data():
 
     s = speedtest.Speedtest()
     s.get_servers(servers)
+    # select server with lowest latency
     s.get_best_server()
     s.download()
-    s.upload()
+    s.upload(pre_allocate=False)
 
-    results_dict = s.results.dict()
-
-    return results_dict
+    return s.results.dict(), s.results.csv()
 
 
-def write_results_to_csv(date_and_time, ping, download, upload):
+def write_results_to_csv(data):
     print("Writing results to CSV")
+    header = "server_id,sponsor,server_name,timestamp,distance,ping,download,upload"
+    filename = "/home/nick/stored_data/internet_speed_test/data.csv"
 
-    out_file = open('/home/nick/stored_data/internet_speed_test/data.csv', 'a')
-    writer = csv.writer(out_file)
-    # TODO: properly separate date and time
-    writer.writerow((date_and_time, ping, download, upload))
+    # if file doesn't exist, creat it with the corresponding header
+    if not (os.path.isfile(filename)):
+        out_file = open(filename, 'w')
+        out_file.write(header + "\n")
+    else:
+        out_file = open(filename, 'a')
+
+    out_file.write(data + "\n")
     out_file.close()
 
 
 def get_twitter_account_info():
     print("Retrieving twitter account info")
-    
+
     auth_file = open('/home/nick/stored_data/internet_speed_test/twitter.txt', 'r')
     alist = []
     for line in auth_file:
         alist.append(line.strip())
-    auth_data = auth_file.readlines()
+    # auth_data = auth_file.readlines()
 
     cfg = {
-      "consumer_key"        : alist[2],
-      "consumer_secret"     : alist[3],
-      "access_token"        : alist[0],
-      "access_token_secret" : alist[1]
-      }
-      
+        "consumer_key"        : alist[2],
+        "consumer_secret"     : alist[3],
+        "access_token"        : alist[0],
+        "access_token_secret" : alist[1]
+    }
+
     auth_file.close()
     t = get_api(cfg)
     return t
@@ -113,42 +116,46 @@ def get_api(cfg):
 
 
 def main():
-    internet_conn = False
-
-    args = parse_arguments()
-
+    args = parse_args()
 
     try:
-        # TODO: necessary if speedtest just fails when no internet is connected?
+        # TODO: necessary if speedtest just fails when no internet connection?
         os.popen("ip route get 8.8.8.8")
-        
+
         # run speedtest
-        results = get_speedtest_data()
+        results, results_csv = get_speedtest_data()
 
         ping = results['ping']
         download = (results['download']/1024)/1024
         upload = (results['upload']/1024)/1024
         test_complete = 1
+    # TODO: add exception type here
     except:
         ping = 0
         download = 0
         upload = 0
         test_complete = 0
-    
-    # save results locally here for future plotting
-    write_results_to_csv(datetime.datetime.now(), ping, download, upload)
 
-    t = get_twitter_account_info()
+        # TODO: configure UTC time to either have T
+        #       or remove T from the speedtest UTC time
+        results_csv = "NA,NA,NA," + str(datetime.datetime.utcnow()) + ",NA,"
+        + str(ping) + "," + str(download) + "," + str(upload)
+
+    # save results locally here for future plotting
+    write_results_to_csv(results_csv)
 
     if test_complete and args.enable_tweet:
+        t = get_twitter_account_info()
         try:
-            tweet = ("my internet speed is" + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "but I pay for 100down/10up in the Bay Area! Why is that?")
-            #tweet = ("@comcast @comcastcares @xfinity my internet speed is" + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "but I pay for 100down/10up in the Bay Area! Why is that? #comcast")
+            tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 100down/10up in the Bay Area! Why is that?")
+            # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 100down/10up in the Bay Area! Why is that? #comcast")
             t.update_status(status=tweet)
+        # TODO: add exception type here
         except:
-            # TODO: have the program wait until internet is restored, and output internet downtime
+            # TODO: have the program wait until internet is restored, and
+            #       output internet downtime
             tweet = "why has my internet been down for X?"
-            #tweet = "@comcast @comcastcares @xfinity why has my internet been down for X? #comcastoutage #xfinityoutage"
+            # tweet = "@comcast @comcastcares @xfinity why has my internet been down for X? #comcastoutage #xfinityoutage"
             t.update_status(status=tweet)
             print("No internet connection, therefore no tweet can be generated.")
     else:
