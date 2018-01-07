@@ -138,8 +138,7 @@ def main():
 
         # TODO: configure UTC time to either have T
         #       or remove T from the speedtest UTC time
-        results_csv = "NA,NA,NA," + str(datetime.datetime.utcnow()) + ",NA,"
-        + str(ping) + "," + str(download) + "," + str(upload)
+        results_csv = "NA,NA,NA," + str(datetime.datetime.utcnow()) + ",NA," + str(ping) + "," + str(download) + "," + str(upload)
 
     # save results locally here for future plotting
     write_results_to_csv(results_csv)
@@ -147,8 +146,8 @@ def main():
     if test_complete and args.enable_tweet:
         t = get_twitter_account_info()
         try:
-            tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 100down/10up in the Bay Area! Why is that?")
-            # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 100down/10up in the Bay Area! Why is that? #comcast")
+            tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that?")
+            # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
             t.update_status(status=tweet)
         # TODO: add exception type here
         except:
