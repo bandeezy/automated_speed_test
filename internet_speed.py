@@ -161,6 +161,7 @@ def main():
                 tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that?")
                 # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
                 t.update_status(status=tweet)
+                print("Internet too slow tweet sent: " + tweet)
         except:  # TODO: add exception type here
             start_time = datetime.datetime.now()
             while not connected_to_internet():
@@ -171,7 +172,7 @@ def main():
             t = get_twitter_account_info()
             tweet = "@comcast @comcastcares @xfinity why has my internet been down for {} seconds in Mountain View, CA? #comcastoutage #xfinityoutage".format(time_diff.seconds)
             t.update_status(status=tweet)
-            print(tweet)
+            print("Internet down tweet sent: " + tweet)
     else:
         print("Internet speed: " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up\nNo tweet sent.")
 
