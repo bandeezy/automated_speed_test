@@ -158,8 +158,7 @@ def main():
             t = get_twitter_account_info()
             # if less than 10Mbps
             if (download < 10.0):
-                tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that?")
-                # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
+                tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
                 t.update_status(status=tweet)
                 print("Internet too slow tweet sent: " + tweet)
         except:  # TODO: add exception type here
