@@ -30,6 +30,7 @@ SOFTWARE.
 import os
 import sys
 import datetime
+import socket
 
 from argparse import ArgumentParser
 
@@ -90,7 +91,6 @@ def write_results_to_csv(data):
 
 def get_twitter_account_info():
     print("Retrieving twitter account info")
-
     auth_file = open('/home/nick/stored_data/internet_speed_test/twitter.txt', 'r')
     alist = []
     for line in auth_file:
@@ -105,23 +105,33 @@ def get_twitter_account_info():
     }
 
     auth_file.close()
-    t = get_api(cfg)
+    t = get_twitter_api(cfg)
     return t
 
 
-def get_api(cfg):
+def get_twitter_api(cfg):
     auth = tweepy.OAuthHandler(cfg['consumer_key'], cfg['consumer_secret'])
     auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
     return tweepy.API(auth)
+
+
+# get this to work
+def connected_to_internet(host="8.8.8.8", port=53, timeout=3):
+    try:
+        socket.setdefaulttimeout(timeout);
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        #os.popen("ip route get 8.8.8.8")
+        print("True")
+        return True
+    except Exception as ex:
+        #print(ex.message)
+        return False
 
 
 def main():
     args = parse_args()
 
     try:
-        # TODO: necessary if speedtest just fails when no internet connection?
-        os.popen("ip route get 8.8.8.8")
-
         # run speedtest
         results, results_csv = get_speedtest_data()
 
@@ -143,20 +153,25 @@ def main():
     # save results locally here for future plotting
     write_results_to_csv(results_csv)
 
-    if test_complete and args.enable_tweet:
-        t = get_twitter_account_info()
+    if args.enable_tweet:
         try:
-            tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that?")
-            # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
+            t = get_twitter_account_info()
+            # if less than 10Mbps
+            if (download < 10.0):
+                tweet = ("my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that?")
+                # tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
+                t.update_status(status=tweet)
+        except:  # TODO: add exception type here
+            start_time = datetime.datetime.now()
+            while not connected_to_internet():
+                pass  # do nothing
+            end_time = datetime.datetime.now()
+            time_diff = end_time - start_time
+
+            t = get_twitter_account_info()
+            tweet = "@comcast @comcastcares @xfinity why has my internet been down for {} seconds in Mountain View, CA? #comcastoutage #xfinityoutage".format(time_diff.seconds)
             t.update_status(status=tweet)
-        # TODO: add exception type here
-        except:
-            # TODO: have the program wait until internet is restored, and
-            #       output internet downtime
-            tweet = "why has my internet been down for X?"
-            # tweet = "@comcast @comcastcares @xfinity why has my internet been down for X? #comcastoutage #xfinityoutage"
-            t.update_status(status=tweet)
-            print("No internet connection, therefore no tweet can be generated.")
+            print(tweet)
     else:
         print("Internet speed: " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up\nNo tweet sent.")
 
