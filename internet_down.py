@@ -31,14 +31,10 @@ import os
 import sys
 import datetime
 import socket
+import time
 
 from argparse import ArgumentParser
 
-try:
-    import speedtest
-except ImportError:
-    print("Could not import module 'speedtest'. Has it been installed?")
-    sys.exit(1)
 try:
     import tweepy
 except ImportError:
@@ -47,30 +43,14 @@ except ImportError:
 
 
 def parse_args():
-    desc = 'Checks internet speed and informs Comcast via Twitter that'\
-            'internet is slow or down.\nAdditionally, this records internet'\
-            'speed data for future plotting.\n'
-
+    desc = 'Checks internet status and informs Comcast via Twitter that'\
+            'internet is down.\n'
     parser = ArgumentParser(description=desc)
     parser.add_argument('--enable_tweet', action='store_true', default=False)
 
     args = parser.parse_args()
 
     return args
-
-
-def get_speedtest_data():
-    print("Testing internet speed")
-    servers = []
-
-    s = speedtest.Speedtest()
-    s.get_servers(servers)
-    # select server with lowest latency
-    s.get_best_server()
-    s.download()
-    s.upload(pre_allocate=False)
-
-    return s.results.dict(), s.results.csv()
 
 
 # TODO: add as library
@@ -118,43 +98,46 @@ def get_twitter_api(cfg):
     return tweepy.API(auth)
 
 
-def main():
-    args = parse_args()
-
+# TODO: add as library
+def connected_to_internet(host="8.8.8.8", port=53, timeout=3):
     try:
-        # run speedtest
-        results, results_csv = get_speedtest_data()
-
-        ping = results['ping']
-        download = (results['download']/1024)/1024
-        upload = (results['upload']/1024)/1024
-        test_complete = 1
-    # TODO: add exception type here
+        socket.setdefaulttimeout(timeout);
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
     except:
         return False
 
-    # save results locally here for future plotting
-    write_results_to_csv(results_csv)
 
-    if args.enable_tweet:
-        try:
-            t = get_twitter_account_info()
-            # if less than 10Mbps
-            if (download < 10.0):
-                tweet = ("@comcast @comcastcares @xfinity my internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast")
+def main():
+    args = parse_args()
+
+    while True:
+        if not connected_to_internet():
+            start_time = datetime.datetime.now()
+            while not connected_to_internet():
+                pass  # do nothing
+            end_time = datetime.datetime.now()
+            time_diff = end_time - start_time
+
+            ping = 0
+            download = 0
+            upload = 0
+            test_complete = 0
+            # TODO: configure UTC time to either have T
+            #       or remove T from the speedtest UTC time
+            results_csv = "NA,NA,NA," + str(datetime.datetime.utcnow()) + ",NA," + str(ping) + "," + str(download) + "," + str(upload) + "," + str(time_diff.seconds) 
+            write_results_to_csv(results_csv)
+
+            if args.enable_tweet:
+                t = get_twitter_account_info()
+                tweet = "@comcast @comcastcares @xfinity why has my internet been down for {} seconds in Mountain View, CA? #comcastoutage #xfinityoutage".format(time_diff.seconds)
                 t.update_status(status=tweet)
-                print("Internet too slow tweet sent: " + tweet)
+                print("Internet down tweet sent: " + tweet)
             else:
-                print("No tweet sent.")
-        except:  # TODO: add exception type here
-            return False
-    else:
-        print("No tweet sent")
-    
-    print("Internet speed: " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up")
-    return True
+                print("Internet was down for {} seconds but tweet was not sent since argument was not set.".format(time_diff.seconds))
+            time.sleep(1)
+        time.sleep(1)
 
 
 if __name__ == '__main__':
     main()
-    print("Speed test complete")
