@@ -130,7 +130,7 @@ def main():
 
             if args.enable_tweet:
                 t = get_twitter_account_info()
-                tweet = "@comcast @comcastcares @xfinity why has my internet been down for {} seconds in Mountain View, CA? #comcastoutage #xfinityoutage".format(time_diff.seconds)
+                tweet = "Why has my internet been down for {} seconds in Mountain View, CA? #comcastoutage #xfinityoutage".format(time_diff.seconds)
                 t.update_status(status=tweet)
                 print("Internet down tweet sent: " + tweet)
             else:
