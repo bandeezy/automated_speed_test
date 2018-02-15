@@ -28,8 +28,6 @@ SOFTWARE.
 # Username: bandeezy
 
 import sys
-import datetime
-import socket
 
 from argparse import ArgumentParser
 
@@ -39,14 +37,16 @@ except ImportError:
     print("Could not import module 'speedtest'. Has it been installed?")
     sys.exit(1)
 try:
-    import modules.twitter_api as twitter 
+    from modules.twitter_api import get_twitter_account_info
 except ImportError:
-    print("Could not import module 'twitter_api'. Ensure it exists within the modules folder.")
+    print("Could not import module 'twitter_api'. Ensure it exists within the\
+           modules folder.")
     sys.exit(1)
 try:
-    import modules.csv_api as csv 
+    from modules.csv_api import write_results_to_csv
 except ImportError:
-    print("Could not import module 'csv_api'. Ensure it exists within the modules folder.")
+    print("Could not import module 'csv_api'. Ensure it exists within the\
+           modules folder.")
     sys.exit(1)
 
 
@@ -84,23 +84,28 @@ def main():
         # run speedtest
         results, results_csv = get_speedtest_data()
 
-        ping = results['ping']
         download = (results['download']/1024)/1024
         upload = (results['upload']/1024)/1024
-        test_complete = 1
     # TODO: add exception type here
     except:
         return False
 
+    print("Internet speed: " + str("{:.1f}".format(download)) + "down/" +
+          str("{:.1f}".format(upload)) + "up")
+
     # save results locally here for future plotting
-    csv.write_results_to_csv(results_csv)
+    write_results_to_csv(results_csv)
 
     if args.enable_tweet:
         try:
-            t = twitter.get_twitter_account_info()
+            t = get_twitter_account_info()
             # if less than 10Mbps
             if (download < 10.0):
-                tweet = ("My internet speed is " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up but I pay for 150down/5up in the Bay Area! Why is that? #comcast #xfinity #comcastsucks")
+                tweet = ("My internet speed is " +
+                         str("{:.1f}".format(download)) + "down/" +
+                         str("{:.1f}".format(upload)) +
+                         "up but I pay for 150down/5up in the Bay Area! Why" +
+                         " is that? #comcast #xfinity #comcastsucks")
                 t.update_status(status=tweet)
                 print("Internet too slow tweet sent: " + tweet)
             else:
@@ -109,9 +114,6 @@ def main():
             return False
     else:
         print("No tweet sent")
-    
-    print("Internet speed: " + str("{:.1f}".format(download)) + "down/" + str("{:.1f}".format(upload)) + "up")
-    return True
 
 
 if __name__ == '__main__':
