@@ -33,7 +33,8 @@ import os
 def write_results_to_csv(data):
     print("Writing results to CSV")
     header = "server_id,sponsor,server_name,timestamp (utc),distance (mi),ping (ms),download (Mbps),upload (Mbps), downtime (s)"
-    filename = "/home/nick/stored_data/internet_speed_test/data.csv"
+    # TODO: replace hard-coded absolute directory
+    filename = "/home/nicks/stored_data/internet_speed_test/data.csv"
 
     # if file doesn't exist, creat it with the corresponding header
     if not (os.path.isfile(filename)):

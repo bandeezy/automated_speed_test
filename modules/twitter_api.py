@@ -27,6 +27,8 @@ SOFTWARE.
 # Author: Nick S.
 # Username: bandeezy
 
+import sys
+
 try:
     import tweepy
 except ImportError:

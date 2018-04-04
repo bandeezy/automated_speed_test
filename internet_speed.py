@@ -27,27 +27,26 @@ SOFTWARE.
 # Author: Nick S.
 # Username: bandeezy
 
-import sys
-
+from sys import exit
 from argparse import ArgumentParser
 
 try:
     import speedtest
 except ImportError:
     print("Could not import module 'speedtest'. Has it been installed?")
-    sys.exit(1)
+    exit(1)
 try:
     from modules.twitter_api import get_twitter_account_info
 except ImportError:
     print("Could not import module 'twitter_api'. Ensure it exists within the\
            modules folder.")
-    sys.exit(1)
+    exit(1)
 try:
     from modules.csv_api import write_results_to_csv
 except ImportError:
     print("Could not import module 'csv_api'. Ensure it exists within the\
            modules folder.")
-    sys.exit(1)
+    exit(1)
 
 
 def parse_args():
