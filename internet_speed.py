@@ -34,7 +34,6 @@ SOFTWARE.
 # Username: bandeezy
 
 import sys
-from argparse import ArgumentParser
 
 try:
     import speedtest
@@ -44,35 +43,28 @@ except ImportError:
 try:
     from modules.twitter_api import get_twitter_account_info
 except ImportError:
-    print("Could not import module 'twitter_api'. Ensure it exists within the\
-           modules folder.")
+    print("Could not import module 'twitter_api'. Ensure it exists within the "
+          "modules folder.")
     sys.exit(1)
 try:
     from modules.csv_api import write_results_to_csv
 except ImportError:
-    print("Could not import module 'csv_api'. Ensure it exists within the\
-           modules folder.")
+    print("Could not import module 'csv_api'. Ensure it exists within the "
+          "modules folder.")
     sys.exit(1)
 try:
     from modules.internet_tools import (connected_to_internet,
                                         convert_bps_to_mbps)
 except ImportError:
-    print("Could not import module 'connected_to_internet'. Ensure it exists within the\
-           modules folder.")
+    print("Could not import module 'connected_to_internet'. Ensure it exists "
+          "within the modules folder.")
     sys.exit(1)
-
-
-def parse_args():
-    parser = ArgumentParser(description=__doc__)
-    # TODO: add argument to set download speed threshold at which a tweet is
-    #       to be sent
-    # TODO: add argument for twitter credentials filename
-    # TODO: add arugment for CSV file location
-    parser.add_argument('--enable-tweet', action='store_true', default=False)
-
-    args = parser.parse_args()
-
-    return args
+try:
+    from modules.common_argument_parser import parse_and_validate_arguments
+except ImportError:
+    print("Could not import module 'connected_to_internet'. Ensure it exists "
+          "within the modules folder.")
+    sys.exit(1)
 
 
 def get_speedtest_data():
@@ -90,7 +82,7 @@ def get_speedtest_data():
 
 
 def main():
-    args = parse_args()
+    args = parse_and_validate_arguments(__file__, __doc__, threshold=True)
 
     # TODO: clean up this syntax
     if not connected_to_internet():
@@ -106,12 +98,14 @@ def main():
           str("{:.1f}".format(upload)) + "up")
 
     # save results locally here for future plotting
-    write_results_to_csv(results.csv(), header=results.csv_header())
+    write_results_to_csv(results.csv(), header=results.csv_header(),
+                         filename=args.output_file)
 
     if args.enable_tweet:
         t = get_twitter_account_info()
+        # TODO: make this a user definable variable
         # if less than 10Mbps
-        if (download < 10.0):
+        if (download < args.threshold):
             tweet = ("My internet speed is " +
                      str("{:.1f}".format(download)) + "down/" +
                      str("{:.1f}".format(upload)) +

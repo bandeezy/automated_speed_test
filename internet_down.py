@@ -32,43 +32,39 @@ SOFTWARE.
 # Author: Nick S.
 # Username: bandeezy
 
-import sys
 from datetime import datetime
+import sys
 import time
 
-from argparse import ArgumentParser
 
 try:
     from modules.twitter_api import get_twitter_account_info
 except ImportError:
-    print("Could not import module 'twitter_api'. Ensure it exists within the\
-           modules folder.")
+    print("Could not import module 'twitter_api'. Ensure it exists within the"
+          " modules folder.")
     sys.exit(1)
 try:
     from modules.csv_api import write_results_to_csv
 except ImportError:
-    print("Could not import module 'csv_api'. Ensure it exists within the\
-           modules folder.")
+    print("Could not import module 'csv_api'. Ensure it exists within the "
+          "modules folder.")
     sys.exit(1)
 try:
     from modules.internet_tools import connected_to_internet
 except ImportError:
-    print("Could not import module 'connected_to_internet'. Ensure it exists within the\
-           modules folder.")
+    print("Could not import module 'connected_to_internet'. Ensure it exists "
+          " within the modules folder.")
+    sys.exit(1)
+try:
+    from modules.common_argument_parser import parse_and_validate_arguments
+except ImportError:
+    print("Could not import module 'connected_to_internet'. Ensure it exists "
+          "within the modules folder.")
     sys.exit(1)
 
 
-def parse_args():
-    parser = ArgumentParser(description=__doc__)
-    parser.add_argument('--enable-tweet', action='store_true', default=False)
-
-    args = parser.parse_args()
-
-    return args
-
-
 def main():
-    args = parse_args()
+    args = parse_and_validate_arguments(__file__, __doc__)
 
     while True:
         if not connected_to_internet():

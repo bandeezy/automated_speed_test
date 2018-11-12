@@ -43,7 +43,9 @@ except ImportError:
 
 
 # TODO: replace relative default filename
-def get_twitter_account_info(credential_file=os.path.join(os.path.dirname(os.path.realpath(__file__)), "../twitter_auth_file.json")):
+def get_twitter_account_info(credential_file=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "../twitter_auth_file.json")):
     print("Retrieving twitter account info")
     with open(credential_file, 'r') as auth_file:
         data = json.load(auth_file)

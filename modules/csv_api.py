@@ -33,11 +33,10 @@ SOFTWARE.
 # Username: bandeezy
 
 import os
+import sys
 
 
-def write_results_to_csv(data,
-                         header=None,
-                         filename="/tmp/internet_speed_test/data.csv"):
+def write_results_to_csv(data, filename, header=None):
     print("Writing results to CSV stored here: {}".format(filename))
 
     # if file doesn't exist, create it with the corresponding header
