@@ -36,14 +36,20 @@ import os
 
 
 def write_results_to_csv(data,
-                         header,
+                         header=None,
                          filename="/tmp/internet_speed_test/data.csv"):
     print("Writing results to CSV stored here: {}".format(filename))
 
     # if file doesn't exist, create it with the corresponding header
     if not (os.path.isfile(filename)):
-        with open(filename, 'w') as out_file:
-            out_file.write(header + "\n")
+        if header:
+            with open(filename, 'w') as out_file:
+                out_file.write(header + "\n")
+        else:
+            print('Please run internet_speed.py at least once before to '
+                  'as this file takes advantage of the speedtest API to '
+                  'generate the header.')
+            sys.exit(1)
 
     with open(filename, 'a') as out_file:
         out_file.write(data + "\n")

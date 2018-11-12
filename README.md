@@ -1,12 +1,16 @@
 # README
 ## Intention
-The intention of both the internet_speed.py and internet_down.py scripts is
-for them to be run as a cronjob, regularly checking the internet speed and
-connectivity, respectively.
+The intention of the internet_speed.py script is to be run via cronjob at a
+rate the user desires. This will regularly check internet speed, track the
+data in a file and, if the option is set, notify comcast via twitter that
+the internet speed has dropped below a threshold. The internet_down.py scripts
+is intended to be run indefinitely in the background as it will track when and
+for how long the internet connection has been disrupted.
 
 WARNING: enabling the twitter API can result in suspension of your Titter
-account as "spamming" a user that has not made contact with you (such as
-Comcast) violates Twitter's user agreement. Proceed with caution.
+account IF you mentioned (@username) someone as "spamming" a user that has not
+made contact with you (such as Comcast) violates Twitter's user agreement.
+Proceed with caution.
 
 ## Installing dependencies
 ### Speedtest
@@ -16,8 +20,10 @@ Install speedtest for your python distro: https://pypi.org/project/speedtest-cli
 TODO: add instructions
 
 ## Other necessities for setup
-### Creating file for twitter credentials
-TODO: add file structure and example
+### Populating file for twitter credentials
+The twitter_auth_file.json serves as a template to be populated using
+information obtained in the twitter developer account menu that can be seen
+here: https://apps.twitter.com/
 
 ## Running script
 ### cronjob

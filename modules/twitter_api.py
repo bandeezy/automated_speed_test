@@ -31,6 +31,8 @@ SOFTWARE.
 # Author: Nick S.
 # Username: bandeezy
 
+import json
+import os
 import sys
 
 try:
@@ -40,28 +42,17 @@ except ImportError:
     sys.exit(1)
 
 
-def get_twitter_account_info(
-      credential_file='/var/log/internet_speed_test/twitter.txt'):
+# TODO: replace relative default filename
+def get_twitter_account_info(credential_file=os.path.join(os.path.dirname(os.path.realpath(__file__)), "../twitter_auth_file.json")):
     print("Retrieving twitter account info")
     with open(credential_file, 'r') as auth_file:
-        alist = []
-        for line in auth_file:
-            alist.append(line.strip())
-        # TODO: use readlines method instead
-        # auth_data = auth_file.readlines()
+        data = json.load(auth_file)
+        print(data)
 
-    cfg = {
-        "consumer_key":         alist[2],
-        "consumer_secret":      alist[3],
-        "access_token":         alist[0],
-        "access_token_secret":  alist[1],
-    }
-
-    t = get_twitter_api(cfg)
-    return t
+    return get_twitter_api(data)
 
 
 def get_twitter_api(cfg):
     auth = tweepy.OAuthHandler(cfg['consumer_key'], cfg['consumer_secret'])
     auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
-    rbeturn tweepy.API(auth)
+    return tweepy.API(auth)

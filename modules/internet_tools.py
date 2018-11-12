@@ -39,9 +39,13 @@ def connected_to_internet(host="8.8.8.8", port=53, timeout=3):
     '''
     Returns true if connected to the internet, false otherwise
     '''
-    socket.setdefaulttimeout(timeout)
-    return not socket.socket(socket.AF_INET,
-                             socket.SOCK_STREAM).connect((host, port))
+    try:
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET,
+                      socket.SOCK_STREAM).connect((host, port))
+        return True
+    except:
+        return False
 
 
 def convert_bps_to_mbps(val):

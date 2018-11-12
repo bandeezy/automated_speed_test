@@ -68,7 +68,7 @@ def parse_args():
     #       to be sent
     # TODO: add argument for twitter credentials filename
     # TODO: add arugment for CSV file location
-    parser.add_argument('--enable_tweet', action='store_true', default=False)
+    parser.add_argument('--enable-tweet', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -92,6 +92,7 @@ def get_speedtest_data():
 def main():
     args = parse_args()
 
+    # TODO: clean up this syntax
     if not connected_to_internet():
         print('Not connected to the internet. Please connect to a network '
               'and try again.')

@@ -60,7 +60,7 @@ except ImportError:
 
 def parse_args():
     parser = ArgumentParser(description=__doc__)
-    parser.add_argument('--enable_tweet', action='store_true', default=False)
+    parser.add_argument('--enable-tweet', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -101,6 +101,7 @@ def main():
                 print("Internet was down for {} ".format(time_diff.seconds) +
                       "seconds but tweet was not sent since argument was "
                       "not set")
+            # TODO: sleep introduces some error, figure out a way around this
             time.sleep(1)
         time.sleep(1)
 
