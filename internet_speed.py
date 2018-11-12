@@ -1,6 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
+__doc__ = '''
+Checks internet speed and gives the option of informing Comcast via
+Twitter that the internet connection is slow. Additionally, this records
+internet speed data in CSV format for future plotting.
 '''
+
+__copyright__ = '''
 MIT License
 
 Copyright (c) 2018 bandeezy
@@ -27,34 +33,41 @@ SOFTWARE.
 # Author: Nick S.
 # Username: bandeezy
 
-from sys import exit
+import sys
 from argparse import ArgumentParser
 
 try:
     import speedtest
 except ImportError:
     print("Could not import module 'speedtest'. Has it been installed?")
-    exit(1)
+    sys.exit(1)
 try:
     from modules.twitter_api import get_twitter_account_info
 except ImportError:
     print("Could not import module 'twitter_api'. Ensure it exists within the\
            modules folder.")
-    exit(1)
+    sys.exit(1)
 try:
     from modules.csv_api import write_results_to_csv
 except ImportError:
     print("Could not import module 'csv_api'. Ensure it exists within the\
            modules folder.")
-    exit(1)
+    sys.exit(1)
+try:
+    from modules.internet_tools import (connected_to_internet,
+                                        convert_bps_to_mbps)
+except ImportError:
+    print("Could not import module 'connected_to_internet'. Ensure it exists within the\
+           modules folder.")
+    sys.exit(1)
 
 
 def parse_args():
-    desc = 'Checks internet speed and informs Comcast via Twitter that'\
-            'internet is slow or down.\nAdditionally, this records internet'\
-            'speed data for future plotting.\n'
-
-    parser = ArgumentParser(description=desc)
+    parser = ArgumentParser(description=__doc__)
+    # TODO: add argument to set download speed threshold at which a tweet is
+    #       to be sent
+    # TODO: add argument for twitter credentials filename
+    # TODO: add arugment for CSV file location
     parser.add_argument('--enable_tweet', action='store_true', default=False)
 
     args = parser.parse_args()
@@ -63,7 +76,7 @@ def parse_args():
 
 
 def get_speedtest_data():
-    print("Testing internet speed")
+    print("Testing internet speed...")
     servers = []
 
     s = speedtest.Speedtest()
@@ -73,48 +86,45 @@ def get_speedtest_data():
     s.download()
     s.upload(pre_allocate=False)
 
-    return s.results.dict(), s.results.csv()
+    return s.results
 
 
 def main():
     args = parse_args()
 
-    try:
-        # run speedtest
-        results, results_csv = get_speedtest_data()
-
-        download = (results['download']/1024)/1024
-        upload = (results['upload']/1024)/1024
-    # TODO: add exception type here
-    except:
+    if not connected_to_internet():
+        print('Not connected to the internet. Please connect to a network '
+              'and try again.')
         return False
+
+    results = get_speedtest_data()
+    download = convert_bps_to_mbps(results.dict()['download'])
+    upload = convert_bps_to_mbps(results.dict()['upload'])
 
     print("Internet speed: " + str("{:.1f}".format(download)) + "down/" +
           str("{:.1f}".format(upload)) + "up")
 
     # save results locally here for future plotting
-    write_results_to_csv(results_csv)
+    write_results_to_csv(results.csv(), header=results.csv_header())
 
     if args.enable_tweet:
-        try:
-            t = get_twitter_account_info()
-            # if less than 10Mbps
-            if (download < 10.0):
-                tweet = ("My internet speed is " +
-                         str("{:.1f}".format(download)) + "down/" +
-                         str("{:.1f}".format(upload)) +
-                         "up but I pay for 150down/5up in the Bay Area! Why" +
-                         " is that? #comcast #xfinity #comcastsucks")
-                t.update_status(status=tweet)
-                print("Internet too slow tweet sent: " + tweet)
-            else:
-                print("No tweet sent.")
-        except:  # TODO: add exception type here
-            return False
+        t = get_twitter_account_info()
+        # if less than 10Mbps
+        if (download < 10.0):
+            tweet = ("My internet speed is " +
+                     str("{:.1f}".format(download)) + "down/" +
+                     str("{:.1f}".format(upload)) +
+                     "up but I pay for 150down/5up in the Bay Area! Why" +
+                     " is that? #comcast #xfinity #comcastsucks")
+            t.update_status(status=tweet)
+            print("Internet too slow tweet sent: " + tweet)
+        else:
+            print("No tweet sent.")
     else:
         print("No tweet sent")
+
+    print("Speed test complete")
 
 
 if __name__ == '__main__':
     main()
-    print("Speed test complete")

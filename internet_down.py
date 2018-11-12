@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
+__doc__ = '''
+Checks internet connectivity and gives the option of informing Comcast via
+Twitter that internet is down.
 '''
+
+__copyright__ = '''
 MIT License
 
 Copyright (c) 2018 bandeezy
@@ -29,7 +34,6 @@ SOFTWARE.
 
 import sys
 from datetime import datetime
-import socket
 import time
 
 from argparse import ArgumentParser
@@ -46,28 +50,21 @@ except ImportError:
     print("Could not import module 'csv_api'. Ensure it exists within the\
            modules folder.")
     sys.exit(1)
+try:
+    from modules.internet_tools import connected_to_internet
+except ImportError:
+    print("Could not import module 'connected_to_internet'. Ensure it exists within the\
+           modules folder.")
+    sys.exit(1)
 
 
 def parse_args():
-    desc = 'Checks internet status and informs Comcast via Twitter that'\
-            'internet is down.\n'
-    parser = ArgumentParser(description=desc)
+    parser = ArgumentParser(description=__doc__)
     parser.add_argument('--enable_tweet', action='store_true', default=False)
 
     args = parser.parse_args()
 
     return args
-
-
-# TODO: add as library
-def connected_to_internet(host="8.8.8.8", port=53, timeout=3):
-    try:
-        socket.setdefaulttimeout(timeout)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
-        return True
-    # TODO; no bare except
-    except:
-        return False
 
 
 def main():
@@ -94,15 +91,15 @@ def main():
 
             if args.enable_tweet:
                 t = get_twitter_account_info()
-                tweet = ("Why has my internet been down for " +
+                tweet = ("Why has my internet been down for "
                          "{} seconds in ".format(time_diff.seconds) +
-                         "Mountain View, CA? #comcastoutage " +
+                         "Mountain View, CA? #comcastoutage "
                          "#xfinityoutage")
                 t.update_status(status=tweet)
                 print("Internet down tweet sent: " + tweet)
             else:
                 print("Internet was down for {} ".format(time_diff.seconds) +
-                      "seconds but tweet was not sent since argument was " +
+                      "seconds but tweet was not sent since argument was "
                       "not set")
             time.sleep(1)
         time.sleep(1)

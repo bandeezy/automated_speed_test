@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 __doc__ = '''
-This module provides functions that are wrappers around the twitter API
+This module provides a function to write csv results to a file from the
+speedtest
 '''
 
 __copyright__ = '''
@@ -31,37 +32,22 @@ SOFTWARE.
 # Author: Nick S.
 # Username: bandeezy
 
-import sys
-
-try:
-    import tweepy
-except ImportError:
-    print("Could not import module 'tweepy'. Has it been installed?")
-    sys.exit(1)
+import socket
 
 
-def get_twitter_account_info(
-      credential_file='/var/log/internet_speed_test/twitter.txt'):
-    print("Retrieving twitter account info")
-    with open(credential_file, 'r') as auth_file:
-        alist = []
-        for line in auth_file:
-            alist.append(line.strip())
-        # TODO: use readlines method instead
-        # auth_data = auth_file.readlines()
-
-    cfg = {
-        "consumer_key":         alist[2],
-        "consumer_secret":      alist[3],
-        "access_token":         alist[0],
-        "access_token_secret":  alist[1],
-    }
-
-    t = get_twitter_api(cfg)
-    return t
+def connected_to_internet(host="8.8.8.8", port=53, timeout=3):
+    '''
+    Returns true if connected to the internet, false otherwise
+    '''
+    socket.setdefaulttimeout(timeout)
+    return not socket.socket(socket.AF_INET,
+                             socket.SOCK_STREAM).connect((host, port))
 
 
-def get_twitter_api(cfg):
-    auth = tweepy.OAuthHandler(cfg['consumer_key'], cfg['consumer_secret'])
-    auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
-    rbeturn tweepy.API(auth)
+def convert_bps_to_mbps(val):
+    '''
+    Converts bits per second to megabits per second
+    :param val: bits per second value to convert
+    :return: megabits per second return value
+    '''
+    return (val / 1024 / 1024)

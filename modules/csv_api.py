@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
+__doc__ = '''
+This module provides a function to write csv results to a file from the
+speedtest
 '''
+
+__copyright__ = '''
 MIT License
 
 Copyright (c) 2018 bandeezy
@@ -30,19 +35,15 @@ SOFTWARE.
 import os
 
 
-def write_results_to_csv(data):
-    print("Writing results to CSV")
-    header = "server_id,sponsor,server_name,timestamp (utc),distance (mi),ping (ms),download (Mbps),upload (Mbps), downtime (s)"
-    # TODO: replace hard-coded absolute directory
-    filename = "/home/nicks/stored_data/internet_speed_test/data.csv"
+def write_results_to_csv(data,
+                         header,
+                         filename="/tmp/internet_speed_test/data.csv"):
+    print("Writing results to CSV stored here: {}".format(filename))
 
-    # if file doesn't exist, creat it with the corresponding header
+    # if file doesn't exist, create it with the corresponding header
     if not (os.path.isfile(filename)):
-        out_file = open(filename, 'w')
-        out_file.write(header + "\n")
-    else:
-        out_file = open(filename, 'a')
+        with open(filename, 'w') as out_file:
+            out_file.write(header + "\n")
 
-    out_file.write(data + "\n")
-    out_file.close()
-
+    with open(filename, 'a') as out_file:
+        out_file.write(data + "\n")
