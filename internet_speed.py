@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 __doc__ = '''
 Checks internet speed and gives the option of informing Comcast via
@@ -56,13 +56,13 @@ try:
     from modules.internet_tools import (connected_to_internet,
                                         convert_bps_to_mbps)
 except ImportError:
-    print("Could not import module 'connected_to_internet'. Ensure it exists "
+    print("Could not import module 'internet_tools'. Ensure it exists "
           "within the modules folder.")
     sys.exit(1)
 try:
     from modules.common_argument_parser import parse_and_validate_arguments
 except ImportError:
-    print("Could not import module 'connected_to_internet'. Ensure it exists "
+    print("Could not import module 'common_argument_parser'. Ensure it exists "
           "within the modules folder.")
     sys.exit(1)
 

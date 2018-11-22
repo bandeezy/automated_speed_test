@@ -41,7 +41,7 @@ try:
     from modules.twitter_api import get_twitter_account_info
 except ImportError:
     print("Could not import module 'twitter_api'. Ensure it exists within the"
-          " modules folder.")
+          "modules folder.")
     sys.exit(1)
 try:
     from modules.csv_api import write_results_to_csv
@@ -52,13 +52,13 @@ except ImportError:
 try:
     from modules.internet_tools import connected_to_internet
 except ImportError:
-    print("Could not import module 'connected_to_internet'. Ensure it exists "
-          " within the modules folder.")
+    print("Could not import module 'internet_tools'. Ensure it exists "
+          "within the modules folder.")
     sys.exit(1)
 try:
     from modules.common_argument_parser import parse_and_validate_arguments
 except ImportError:
-    print("Could not import module 'connected_to_internet'. Ensure it exists "
+    print("Could not import module 'common_argument_parser'. Ensure it exists "
           "within the modules folder.")
     sys.exit(1)
 
@@ -83,7 +83,7 @@ def main():
                            str(ping) + "," + str(download) + "," + str(upload)
                            + "," + str(time_diff.seconds))
 
-            write_results_to_csv(results_csv)
+            write_results_to_csv(results_csv, args.output_file)
 
             if args.enable_tweet:
                 t = get_twitter_account_info()

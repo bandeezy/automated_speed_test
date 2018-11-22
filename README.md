@@ -35,4 +35,3 @@ thresholds can be set for which Comcast will be notified via twitter.
 # General things to do
 * Use logger library instead of print, include debugs
 * Add option of passing twitter credentials directly to script
-* Check compatibility of all scripts with python2 and 3
